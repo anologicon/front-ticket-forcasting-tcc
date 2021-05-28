@@ -1,4 +1,9 @@
 import streamlit as st
+import pandas as pd
+from ModelDecisiontree import ModelDecisiontree
+from joblib import load
+import plotly.offline as py
+import plotly.graph_objs as go
 
 diretores = ['Sam Mendes', 'Michael Spierig, Peter Spierig', 'Michael Chaves',
              'James Gray', 'Jenny Gage', 'Robert Rodriguez',
@@ -118,8 +123,9 @@ generos = ['Animação', 'Aventura', 'Ação', 'Comédia',
 
 filme = {}
 
+
 for genero in generos:
-    filme[genero] = False
+    filme[genero] = 0
 
 
 st.sidebar.markdown('# Filme')
@@ -160,13 +166,23 @@ st.sidebar.markdown(r"""## Genero """)
 
 generoSelecionadoFilme = st.sidebar.multiselect('Selecionados', generos)
 
+for generoFilme in generoSelecionadoFilme:
+    filme[generoFilme] = 1
+
 st.title('Previsão de vendas de ingressos')
 
-st.markdown(r"""
+cols1, cols2 = st.beta_columns(2)
+
+cols1.markdown(r"""
 
 ## Sessão
 
 """)
+
+predictThis = False
+
+if cols2.button('Gerar Projeção'):
+    predictThis = True
 
 st.markdown("---")
 
@@ -176,6 +192,42 @@ data_inicio = col1.date_input('De')
 
 data_fim = col2.date_input('Até')
 
-col3.time_input('Horáriro')
+data_range = pd.date_range(start=data_inicio, end=data_fim)
 
-col4.selectbox('Sala', ['Sala 01', 'Sala 02', 'Sala 03', 'Sala 04'])
+filme['hora'] = col3.time_input('Horáriro', help="Somente a hora sera utilizada").strftime("%H")
+
+filme['salaCinema'] = col4.selectbox('Sala', ['Sala 01', 'Sala 02', 'Sala 03', 'Sala 04'])
+
+
+sessoes = []
+for date in data_range:
+    filmeCopy = filme.copy()
+
+    filmeCopy['data'] = date.date().strftime('%Y-%m-%d')
+
+    sessoes.append(filmeCopy)
+
+df = pd.DataFrame(sessoes)
+
+modelPredictor = ModelDecisiontree()
+
+
+dfPredict = pd.DataFrame([{'data': 0,
+                          'hora': 0,
+                          'salaCinema': 0,
+                          'result': 0}])
+
+
+if predictThis:
+    dfPredict = modelPredictor.predict(df)
+
+    trace = go.Scatter(x = dfPredict['data'], y=dfPredict['result'])
+
+    data = [trace]
+
+    layout = go.Layout(yaxis={'title': 'Vendas de ingressos'},
+                       xaxis={'title': 'Dias'})
+
+    fig = go.Figure(data=data, layout=layout)
+
+    st.plotly_chart(fig)
