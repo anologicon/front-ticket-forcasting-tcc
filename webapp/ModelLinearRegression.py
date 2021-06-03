@@ -3,13 +3,11 @@ import os
 import pandas as pd
 import holidays
 import numpy as np
-import streamlit as st
 
-
-class ModelDecisiontree:
+class ModelLinearRegression:
 
     def __init__(self):
-        self.model = load('webapp/dtModel.joblib')
+        self.model = load('webapp/linearModel.joblib')
 
     def getModel(self):
         return self.model

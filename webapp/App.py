@@ -1,9 +1,11 @@
 import streamlit as st
 import pandas as pd
 from ModelDecisiontree import ModelDecisiontree
+from ModelLinearRegression import ModelLinearRegression
 from joblib import load
 import plotly.offline as py
 import plotly.graph_objs as go
+from Regression import Regression
 
 diretores = ['Sam Mendes', 'Michael Spierig, Peter Spierig', 'Michael Chaves',
              'James Gray', 'Jenny Gage', 'Robert Rodriguez',
@@ -209,24 +211,45 @@ for date in data_range:
 
 df = pd.DataFrame(sessoes)
 
-modelPredictor = ModelDecisiontree()
-
 
 dfPredict = pd.DataFrame([{'data': 0,
                           'hora': 0,
                           'salaCinema': 0,
                           'result': 0}])
 
-
 if predictThis:
-    dfPredict = modelPredictor.predict(df)
+
+    modelPredictor = ModelDecisiontree()
+
+    decisionTreeRegression = Regression(modelPredictor)
+
+    dfPredict = decisionTreeRegression.predict(df)
 
     trace = go.Scatter(x = dfPredict['data'], y=dfPredict['result'])
 
     data = [trace]
 
     layout = go.Layout(yaxis={'title': 'Vendas de ingressos'},
-                       xaxis={'title': 'Dias'})
+                       xaxis={'title': 'Dias'},
+                       title="Árvore de Decisão")
+
+    fig = go.Figure(data=data, layout=layout)
+
+    st.plotly_chart(fig)
+
+    modelLinear = ModelLinearRegression()
+
+    regressionLinear = Regression(modelLinear)
+
+    dfPredict = regressionLinear.predict(df)
+
+    trace = go.Scatter(x=dfPredict['data'], y=dfPredict['result'])
+
+    data = [trace]
+
+    layout = go.Layout(yaxis={'title': 'Vendas de ingressos'},
+                       xaxis={'title': 'Dias'},
+                       title="Regressão Linear")
 
     fig = go.Figure(data=data, layout=layout)
 
