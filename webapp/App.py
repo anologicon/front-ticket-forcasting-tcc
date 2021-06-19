@@ -7,6 +7,8 @@ import plotly.offline as py
 import plotly.graph_objs as go
 from Regression import Regression
 
+st.set_page_config(page_title='Predição de ingressos')
+
 diretores = ['Sam Mendes', 'Michael Spierig, Peter Spierig', 'Michael Chaves',
              'James Gray', 'Jenny Gage', 'Robert Rodriguez',
              'Rawson Marshall Thurber', 'Elizabeth Banks', 'Lars Klevberg',
@@ -219,38 +221,43 @@ dfPredict = pd.DataFrame([{'data': 0,
 
 if predictThis:
 
-    modelPredictor = ModelDecisiontree()
+    if filme['tempoFilme'] < 30:
+        st.error("O filme deve conter ao menos 30 minutos")
+    elif len(generoSelecionadoFilme) == 0:
+        st.error("O filme deve conter ao menos um gênero")
+    else:
+        modelPredictor = ModelDecisiontree()
 
-    decisionTreeRegression = Regression(modelPredictor)
+        decisionTreeRegression = Regression(modelPredictor)
 
-    dfPredict = decisionTreeRegression.predict(df)
+        dfPredict = decisionTreeRegression.predict(df)
 
-    trace = go.Scatter(x = dfPredict['data'], y=dfPredict['result'])
+        trace = go.Scatter(x = dfPredict['data'], y=dfPredict['result'])
 
-    data = [trace]
+        data = [trace]
 
-    layout = go.Layout(yaxis={'title': 'Vendas de ingressos'},
-                       xaxis={'title': 'Dias'},
-                       title="Árvore de Decisão")
+        layout = go.Layout(yaxis={'title': 'Vendas de ingressos'},
+                        xaxis={'title': 'Dias'},
+                        title="Árvore de Decisão")
 
-    fig = go.Figure(data=data, layout=layout)
+        fig = go.Figure(data=data, layout=layout)
 
-    st.plotly_chart(fig)
+        st.plotly_chart(fig)
 
-    modelLinear = ModelLinearRegression()
+        modelLinear = ModelLinearRegression()
 
-    regressionLinear = Regression(modelLinear)
+        regressionLinear = Regression(modelLinear)
 
-    dfPredict = regressionLinear.predict(df)
+        dfPredict = regressionLinear.predict(df)
 
-    trace = go.Scatter(x=dfPredict['data'], y=dfPredict['result'])
+        trace = go.Scatter(x=dfPredict['data'], y=dfPredict['result'])
 
-    data = [trace]
+        data = [trace]
 
-    layout = go.Layout(yaxis={'title': 'Vendas de ingressos'},
-                       xaxis={'title': 'Dias'},
-                       title="Regressão Linear")
+        layout = go.Layout(yaxis={'title': 'Vendas de ingressos'},
+                        xaxis={'title': 'Dias'},
+                        title="Regressão Linear")
 
-    fig = go.Figure(data=data, layout=layout)
+        fig = go.Figure(data=data, layout=layout)
 
-    st.plotly_chart(fig)
+        st.plotly_chart(fig)
